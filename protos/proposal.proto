@@ -1,0 +1,46 @@
+// Copyright 2018 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// -----------------------------------------------------------------------------
+
+syntax = "proto3";
+
+
+message Proposal {
+    enum Status {
+        OPEN = 0;
+        ACCEPTED = 1;
+        REJECTED = 2;
+        CANCELED = 3;
+    }
+
+    // The id of the Record with which this Proposal deals
+    string record_id = 1;
+
+    // The public key of the Agent that created the Proposal
+    string issuing_agent = 2;
+
+    // The public key of the Agent to which the Proposal is addressed
+    string receiving_agent = 3;
+
+    // Whether the Proposal is open, accepted, rejected, or canceled.
+    Status status = 5;
+
+    // Approximately when this Proposal was created, as a Unix UTC timestamp
+    uint64 timestamp = 6;
+}
+
+
+message ProposalContainer {
+    repeated Proposal entries = 1;
+}

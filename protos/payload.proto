@@ -1,0 +1,96 @@
+// Copyright 2018 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// -----------------------------------------------------------------------------
+
+syntax = "proto3";
+
+
+message SimpleSupplyPayload{
+    enum Action {
+        CREATE_AGENT = 0;
+        CREATE_RECORD = 1;
+        UPDATE_RECORD = 2;
+        CREATE_PROPOSAL = 3;
+        ANSWER_PROPOSAL = 4;
+    }
+
+    // Whether the payload contains a create agent, create record,
+    // update record, create proposal, or answer proposal action
+    Action action = 1;
+
+    // The transaction handler will read from just one of these fields
+    // according to the Action
+    CreateAgentAction create_agent = 2;
+    CreateRecordAction create_record = 3;
+    UpdateRecordAction update_record = 4;
+    CreateProposalAction create_proposal = 5;
+    AnswerProposalAction answer_proposal = 6;
+
+    // Approximately when transaction was submitted, as a Unix UTC timestamp
+    uint64 timestamp = 7;
+}
+
+
+message CreateAgentAction {
+    // A human-readable name identifying the new Agent
+    string name = 1;
+}
+
+
+message CreateRecordAction {
+    // The user-defined natural key which identifies the object in the
+    // real world (for example a serial number)
+    string record_id = 1;
+
+    // Coordinates are expected to be in millionths of a degree
+    sint64 latitude = 2;
+    sint64 longitude = 3;
+}
+
+
+message UpdateRecordAction {
+    // The id of the Record being updated
+    string record_id = 1;
+
+    // Coordinates are expected to be in millionths of a degree
+    sint64 latitude = 2;
+    sint64 longitude = 3;
+}
+
+
+message CreateProposalAction {
+    // The id of the Record for the proposed ownership transfer
+    string record_id = 1;
+
+    // The public key of the Agent to which the Proposal is addressed
+    string receiving_agent = 2;
+}
+
+
+message AnswerProposalAction {
+    enum Response {
+        ACCEPT = 0;
+        REJECT = 1;
+        CANCEL = 2;
+    }
+
+    // The id of the Record that is referenced by the Propsal being answered
+    string record_id = 1;
+
+    // The public key of the Agent to which the Proposal is addressed
+    string receiving_agent = 2;
+
+    // Whether the Proposal is being accepted, rejected, or cancelled
+    Response response = 3;
+}
