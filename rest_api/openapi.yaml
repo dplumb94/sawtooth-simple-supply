@@ -1,0 +1,383 @@
+swagger: '2.0'
+info:
+  version: 0.0.0
+  title: Sawtooth Simple Supply REST API
+
+paths:
+  /agents:
+    post:
+      description: Creates a new Agent
+      parameters:
+        - name: record
+          description: Info for Agent to add to state
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewAgentBody'
+      responses:
+        200:
+          description: Success response with the new Agent object
+          schema:
+            $ref: '#/definitions/AgentObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+    get:
+      description: Fetches complete details of all Agents in state
+      responses:
+        200:
+          description: Success response with a list of Agent objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/AgentObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+
+  /agents/{agent_id}:
+    parameters:
+      - $ref: '#/parameters/agent_id'
+    get:
+      description: Fetches complete details of an Agent in state
+      responses:
+        200:
+          description: Success response with the requested Agent object
+          schema:
+            $ref: '#/definitions/AgentObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500ServerError'
+
+  /records:
+    post:
+      description: Creates a new Record
+      parameters:
+        - name: record
+          description: Info for Record to add to state
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewRecordBody'
+      responses:
+        200:
+          description: Success response with new Record object
+          schema:
+            $ref: '#/definitions/RecordObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+    get:
+      description: Fetches complete details of all Records in state
+      responses:
+        200:
+          description: Success response with list of Records
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RecordObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+
+  /records/{record_id}:
+    parameters:
+      - $ref: '#/parameters/record_id'
+    patch:
+      description: Updates a Record's location
+      parameters:
+        - name: update
+          description: Updated location parameters
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateRecordBody'
+      responses:
+        200:
+          description: Success response with the updated Record object
+          schema:
+            $ref: '#/definitions/RecordObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+    get:
+        description: Fetches complete details of a Record in state
+        responses:
+          200:
+            description: Success response with the requested Record
+            schema:
+              $ref: '#/definitions/RecordObject'
+          400:
+            $ref: '#/responses/400BadRequest'
+          404:
+            $ref: '#/responses/404NotFound'
+          500:
+            $ref: '#/responses/500ServerError'
+
+
+  /records/{record_id}/proposals:
+    parameters:
+        - $ref: '#/parameters/record_id'
+    post:
+      description: Creates a new Proposal
+      parameters:
+        - name: proposal
+          description: Info for Proposal to add to state
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProposalBody'
+      responses:
+        200:
+          description: Success response with new Proposal object
+          schema:
+            $ref: '#/definitions/ProposalObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+    patch:
+      description: Answers a Proposal
+      parameters:
+        - name: answer
+          description: Info for the updated Proposal
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AnswerProposalBody'
+      responses:
+        200:
+          description: Success response
+        400:
+          $ref: '#/responses/400BadRequest'
+        500:
+          $ref: '#/responses/500ServerError'
+    get:
+      description: Fetches details for all Proposals for a Record. Using the `receiving_agent` field will narrow the list to any Proposals that have a matching value in their receiving_agent field. Using the `status` parameter will narrow the list to any Proposals that have a matching value in their status field
+      parameters:
+        - $ref: '#/parameters/receiving_agent'
+        - $ref: '#/parameters/status'
+      responses:
+        200:
+          description: Success response with list of Proposals
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProposalObject'
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500ServerError'
+
+responses:
+  400BadRequest:
+    description: Client request was invalid
+    schema:
+      $ref: '#/definitions/ErrorObject'
+
+  404NotFound:
+    description: Name, key, or id did not match any resource
+    schema:
+      $ref: '#/definitions/ErrorObject'
+
+  500ServerError:
+    description: Something went wrong within the REST API
+    schema:
+      $ref: '#/definitions/ErrorObject'
+
+definitions:
+  AgentObject:
+    properties:
+      public_key:
+        description: The Agent's unique public key
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      name:
+        description: A human-readable name identifying the Agent
+        type: string
+        example: 'Beyonce Knowles'
+      timestamp:
+        description: Approximately when the Agent was registered, as a Unix UTC timestamp
+        type: number
+        example: 20180124130651
+
+  AnswerProposalBody:
+    properties:
+      receiving_agent:
+        description: Id of the Agent for the proposed ownership transfer
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      response:
+        description: Whether the Proposal is being accepted, rejected, or cancelled
+        type: string
+        enum:
+          - ACCEPT
+          - REJECT
+          - CANCEL
+
+  ErrorObject:
+    properties:
+      error:
+        description: A message describing the error that occured
+        type: string
+
+  LocationObject:
+    properties:
+      latitude:
+        description: Latitude of the Record in millionths of digits
+        type: number
+        example: 44.982734
+      longitude:
+        description: Longitude of the Record in millionths of digits
+        type: number
+        example: -93.272107
+      timestamp:
+        description: Unix UTC timestamp of when the Location update was submitted
+        type: number
+        example: 20180124130651
+
+  NewAgentBody:
+    properties:
+      name:
+        description: A human-readable name identifying the new Agent
+        type: string
+        example: 'Beyonce Knowles-Carter'
+
+  NewProposalBody:
+    properties:
+      record_id:
+        description: Id of the Agent for the proposed ownership transfer
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      receiving_agent:
+        description: Public key of the receiving Agent of the proposal
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+
+  NewRecordBody:
+    properties:
+      agent_id:
+        description: Public key of the Agent who owns the Record
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      latitude:
+        description: Initial latitude of the Record in millionths of digits
+        type: number
+        example: 44.982734
+      longitude:
+        description: Initial longitude of the Record in millionths of digits
+        type: number
+        example: -93.272107
+      record_id:
+        description: User-defined natural key which identifies the object
+        type: string
+        example: 'fish-44'
+
+  OwnerObject:
+    properties:
+      agent_id:
+        description: Public key of a particular Agent in state
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      timestamp:
+        description: Unix UTC timestamp of when the ownership update was submitted
+        type: number
+        example: 20180124130651
+
+  ProposalObject:
+    properties:
+      record_id:
+        description: The id of the Record with which this Proposal deals
+        type: string
+        example: 'fish-44'
+      issuing_agent:
+        description: The public key of the Agent that created the Proposal
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      receiving_agent:
+        description: The public key of the Agent to which the Proposal is adressed
+        type: string
+        example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+      status:
+        description: Whether the Proposal is open, accepted, rejected, or cancelled
+        type: string
+        enum:
+          - OPEN
+          - ACCEPTED
+          - REJECTED
+          - CANCELLED
+      timestamp:
+        description: Approximately when this Proposal was created, as a Unix UTC timestamp
+        type: number
+        example: 20180124130651
+
+  RecordObject:
+    properties:
+      record_id:
+        description: The user-defined natural key which identifies the object
+        type: string
+        example: 'fish-44'
+      owners:
+        type: array
+        items:
+          $ref: '#/definitions/OwnerObject'
+      locations:
+        type: array
+        items:
+          $ref: '#/definitions/LocationObject'
+
+  UpdateRecordBody:
+    properties:
+      latitude:
+        description: Initial latitude of the Record in millionths of digits
+        type: number
+        example: 44.982734
+      longitude:
+        description: Initial longitude of the Record in millionths of digits
+        type: number
+        example: -93.272107
+
+parameters:
+  agent_id:
+    name: agent_id
+    description: Public key of a particular Agent in state
+    in: path
+    required: true
+    type: string
+    x-example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+
+  receiving_agent:
+    name: receiving_agent
+    description: Public key of Proposal's receiving Agent to filter by
+    in: query
+    type: string
+    x-example: '02178c1bcdb25407394348f1ff5273adae287d8ea328184546837957e71c7de57a'
+
+  record_id:
+    name: record_id
+    description: Id of a particular Record in state
+    in: path
+    required: true
+    type: string
+    x-example: 'fish-44'
+
+  status:
+    name: status
+    description: A Proposal status to filter by
+    in: query
+    type: string
+    enum:
+      - OPEN
+      - CANCELED
+      - REJECTED
+      - ACCEPTED
